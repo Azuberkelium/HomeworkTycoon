@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zubi's Maths Homework Shop V10</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'zubi-blue': '#A6E1FA',
+                        'zubi-green': '#B6D7A8',
+                        'zubi-pink': '#F4C2C2',
+                        'zubi-yellow': '#F9E79F',
+                        'slate-gray': '#58616A',
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.5s ease-in-out;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #1f2937;
+        }
+        .container {
+            max-width: 1000px;
+            width: 95%;
+            margin: 2rem auto;
+            background-color: #fff;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 2.5rem;
+        }
+        .message-log {
+            min-height: 3rem;
+            background-color: #f3f4f6;
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            font-size: 0.875rem;
+            color: #4b5563;
+        }
+        .homework-card {
+            background-color: #f8f8f8;
+            border: 2px solid #ddd;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .homework-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .homework-card.selected {
+            border-color: #3b82f6;
+            background-color: #e0f2fe;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .homework-card.premium {
+            background-color: #fffbeb;
+            border-color: #fbbf24;
+        }
+        .homework-card.charity {
+            background-color: #ecfdf5;
+            border-color: #34d399;
+        }
+        .grid-header {
+            font-weight: bold;
+            text-align: center;
+        }
+        .resource-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        .premium-star {
+            position: absolute;
+            top: 0.5rem;
+            left: 0.5rem;
+            font-size: 1.5rem;
+            color: #fbbf24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Game Stats -->
+        <div class="lg:col-span-1 p-6 bg-zubi-pink rounded-xl shadow-lg flex flex-col items-center">
+            <h1 class="text-4xl font-bold mb-4 text-slate-gray text-center">Zubi's Homework Shop</h1>
+            <div class="grid grid-cols-2 gap-4 w-full">
+                <div class="p-4 bg-white rounded-lg shadow-inner text-center">
+                    <p class="text-sm font-medium text-slate-gray">Day</p>
+                    <p id="day-display" class="text-2xl font-bold">1</p>
+                </div>
+                <div class="p-4 bg-white rounded-lg shadow-inner text-center">
+                    <p class="text-sm font-medium text-slate-gray">Money</p>
+                    <p id="money-display" class="text-2xl font-bold text-zubi-green">£0.00</p>
+                </div>
+                <div class="p-4 bg-white rounded-lg shadow-inner text-center">
+                    <p class="text-sm font-medium text-slate-gray">Hours Left</p>
+                    <p id="timer-display" class="text-2xl font-bold">12:00</p>
+                </div>
+                <div class="p-4 bg-white rounded-lg shadow-inner text-center">
+                    <p class="text-sm font-medium text-slate-gray">Homeworks Completed</p>
+                    <p id="completed-display" class="text-2xl font-bold">0</p>
+                </div>
+            </div>
+            
+            <div class="w-full mt-4">
+                <h3 class="text-xl font-semibold mb-2 text-slate-gray">Area: <span id="area-display"></span></h3>
+                <h3 class="text-xl font-semibold mb-2 text-slate-gray">Supplies</h3>
+                <div class="resource-row">
+                    <p class="text-sm font-medium text-gray-700">Textbooks: <span id="textbooks-display">0</span></p>
+                    <button id="buy-textbooks-btn" class="py-1 px-3 bg-gray-200 rounded-lg text-xs font-bold hover:bg-gray-300 transition-colors">Buy (£5)</button>
+                </div>
+                <div class="resource-row">
+                    <p class="text-sm font-medium text-gray-700">Calc. Batteries: <span id="batteries-display">0</span></p>
+                    <button id="buy-batteries-btn" class="py-1 px-3 bg-gray-200 rounded-lg text-xs font-bold hover:bg-gray-300 transition-colors">Buy (£2)</button>
+                </div>
+                <div class="resource-row">
+                    <p class="text-sm font-medium text-gray-700">Pens: <span id="pens-display">0</span></p>
+                    <button id="buy-pens-btn" class="py-1 px-3 bg-gray-200 rounded-lg text-xs font-bold hover:bg-gray-300 transition-colors">Buy (£1)</button>
+                </div>
+            </div>
+
+            <div class="w-full mt-6">
+                <h3 class="text-xl font-semibold mb-2 text-slate-gray">Upgrades</h3>
+                <div class="grid grid-cols-1 gap-2">
+                    <button id="buy-ad-btn" class="w-full py-2 px-4 bg-zubi-yellow text-slate-gray font-bold rounded-lg shadow-md hover:bg-yellow-400 transition-colors">
+                        Buy Advertising (£50)
+                    </button>
+                    <button id="buy-laptop-btn" class="w-full py-2 px-4 bg-zubi-blue text-white font-bold rounded-lg shadow-md hover:bg-blue-500 transition-colors">
+                        Buy Laptop (£500)
+                    </button>
+                    <button id="hire-employee-btn" class="w-full py-2 px-4 bg-zubi-green text-white font-bold rounded-lg shadow-md hover:bg-green-700 transition-colors">
+                        Hire Employee for Today (£50)
+                    </button>
+                    <button id="unlock-level-btn" class="w-full py-2 px-4 bg-purple-500 text-white font-bold rounded-lg shadow-md hover:bg-purple-700 transition-colors">
+                        Unlock Next Area (£1000)
+                    </button>
+                </div>
+            </div>
+
+            <div class="w-full mt-6">
+                <h3 class="text-xl font-semibold mb-2 text-slate-gray">Game Log</h3>
+                <p id="message-log" class="message-log">Welcome to the shop!</p>
+            </div>
+        </div>
+
+        <!-- Homework Queue and Actions -->
+        <div class="lg:col-span-2 p-6 bg-white rounded-xl shadow-lg">
+            <h2 class="text-2xl font-bold mb-4 text-slate-gray">Quoting & Homework</h2>
+            
+            <!-- Quoting Interface -->
+            <div id="quote-section" class="mb-4 p-4 bg-gray-100 rounded-lg hidden">
+                <h3 class="text-lg font-bold text-slate-gray mb-2">Quote for <span id="customer-name"></span></h3>
+                <p class="text-sm text-gray-700">Task: <span id="homework-task"></span></p>
+                <p class="text-sm text-gray-700">Grade: <span id="homework-grade"></span>, Difficulty: <span id="homework-difficulty"></span>/5</p>
+                
+                <div class="mt-4 p-2 bg-gray-200 rounded-lg text-sm text-gray-800">
+                    <p>Estimated Completion Time: <span id="estimated-time"></span></p>
+                    <p>Pens Needed: <span id="pens-needed"></span></p>
+                    <p>Batteries Needed: <span id="batteries-needed"></span></p>
+                    <p>Textbooks Needed: <span id="textbooks-needed"></span></p>
+                    <p class="mt-2 text-xs font-bold">Effect: <span id="job-effect"></span></p>
+                </div>
+
+                <div class="flex items-center space-x-2 mt-4">
+                    <label for="quote-input" class="text-sm font-medium text-gray-700">Your Quote (£):</label>
+                    <input type="number" id="quote-input" value="1.00" min="0.01" step="0.01" class="w-24 p-2 border border-gray-300 rounded-lg text-center">
+                    <button id="offer-price-btn" class="py-2 px-4 bg-zubi-green text-white font-bold rounded-lg hover:bg-green-700 transition-colors">Offer Price</button>
+                </div>
+            </div>
+
+            <h2 class="text-2xl font-bold mb-4 text-slate-gray">Accepted Homework Queue</h2>
+            
+            <div id="queue-container" class="grid grid-cols-5 gap-2 text-center text-sm">
+                <p class="grid-header">Customer</p>
+                <p class="grid-header">Task Name</p>
+                <p class="grid-header">Grade</p>
+                <p class="grid-header">Time (hrs)</p>
+                <p class="grid-header">Difficulty</p>
+            </div>
+            
+            <div id="homework-list" class="mt-4 grid grid-cols-1 gap-2">
+                <!-- Homework items will be dynamically added here -->
+            </div>
+            
+            <div class="mt-8 flex justify-between gap-4">
+                <button id="start-homework-btn" disabled class="flex-grow py-3 px-6 bg-gray-300 text-gray-500 font-bold rounded-lg shadow-md transition-colors">
+                    Start Homework
+                </button>
+                <button id="next-day-btn" class="flex-grow py-3 px-6 bg-zubi-blue text-white font-bold rounded-lg shadow-md hover:bg-blue-500 transition-colors">
+                    End Day
+                </button>
+            </div>
+            <div class="mt-4 text-center">
+                <button id="restart-game-btn" class="py-2 px-4 text-xs text-gray-500 rounded-lg hover:underline">
+                    Restart Game
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        window.onload = function() {
+            let day = 1;
+            let money = 20.00;
+            let textbooks = 10;
+            let calcBatteries = 10;
+            let pens = 20;
+            let homeworksCompleted = 0;
+            let homeworkQueue = [];
+            let potentialCustomers = [];
+            let currentCustomer = null;
+            let selectedHomework = null;
+            let adLevel = 0;
+            let laptopUpgraded = false;
+            let isEmployeeHiredToday = false;
+            let hoursLeft = 12;
+            let currentLevel = 1;
+            let dayEnded = false;
+
+            const customerNames = [
+                'Araba', 'Kamsiyonna', 'Azubuike', 'Nnenna', 'Chidi', 'Adaeze', 'Oluwatobi',
+                'Zubi', 'Mummy', 'Papa', 'Leo', 'Mia', 'Nora', 'Oscar', 'Emma', 'Liam',
+                'Olivia', 'Lucas', 'Charlotte', 'Mason', 'Amelia', 'Ethan', 'Harper',
+                'Jacob', 'Evelyn', 'Noah', 'Abigail', 'Jamal', 'Aisha', 'Mohammed', 'Fatima',
+                'Santi', 'Sofia', 'Mateo', 'Valentina', 'Hiroshi', 'Yuki', 'Kaito', 'Sora'
+            ];
+            const homeworkTasks = [
+                'Algebraic Expressions', 'Differential Calculus', 'Geometry Proofs', 'Probability Theory',
+                'Matrices', 'Trigonometry', 'Quadratic Equations', 'Linear Algebra', 'Statistics',
+                'Number Theory', 'Tax Return', 'Quarterly Report', 'Fundraising Report', 'Budgeting'
+            ];
+            const adCosts = [50, 100, 200, 400, 800];
+            const levelUnlockCosts = [1000, 2000, 4000, 8000];
+            const areaNames = ['Poorville', 'Snobland', 'Oldmoneyton', 'Corporate District', 'Academic City'];
+            const areaBackgrounds = {
+                'Poorville': 'bg-red-200',
+                'Snobland': 'bg-yellow-200',
+                'Oldmoneyton': 'bg-green-200',
+                'Corporate District': 'bg-blue-200',
+                'Academic City': 'bg-indigo-200'
+            };
+
+            const baseSuppliesCost = { textbooks: 5, batteries: 2, pens: 1 };
+            const shopOpenHours = 12;
+
+            const dayDisplay = document.getElementById('day-display');
+            const moneyDisplay = document.getElementById('money-display');
+            const textbooksDisplay = document.getElementById('textbooks-display');
+            const batteriesDisplay = document.getElementById('batteries-display');
+            const pensDisplay = document.getElementById('pens-display');
+            const completedDisplay = document.getElementById('completed-display');
+            const timerDisplay = document.getElementById('timer-display');
+            const messageLog = document.getElementById('message-log');
+            const homeworkList = document.getElementById('homework-list');
+            const startHomeworkBtn = document.getElementById('start-homework-btn');
+            const nextDayBtn = document.getElementById('next-day-btn');
+            const restartGameBtn = document.getElementById('restart-game-btn');
+            const buyTextbooksBtn = document.getElementById('buy-textbooks-btn');
+            const buyBatteriesBtn = document.getElementById('buy-batteries-btn');
+            const buyPensBtn = document.getElementById('buy-pens-btn');
+            const buyAdBtn = document.getElementById('buy-ad-btn');
+            const buyLaptopBtn = document.getElementById('buy-laptop-btn');
+            const hireEmployeeBtn = document.getElementById('hire-employee-btn');
+            const unlockLevelBtn = document.getElementById('unlock-level-btn');
+            const areaDisplay = document.getElementById('area-display');
+            const quoteSection = document.getElementById('quote-section');
+            const customerNameDisplay = document.getElementById('customer-name');
+            const homeworkTaskDisplay = document.getElementById('homework-task');
+            const homeworkGradeDisplay = document.getElementById('homework-grade');
+            const homeworkDifficultyDisplay = document.getElementById('homework-difficulty');
+            const quoteInput = document.getElementById('quote-input');
+            const offerPriceBtn = document.getElementById('offer-price-btn');
+            
+            // New UI elements for estimated costs
+            const estimatedTimeDisplay = document.getElementById('estimated-time');
+            const pensNeededDisplay = document.getElementById('pens-needed');
+            const batteriesNeededDisplay = document.getElementById('batteries-needed');
+            const textbooksNeededDisplay = document.getElementById('textbooks-needed');
+            const jobEffectDisplay = document.getElementById('job-effect');
+
+            // --- Game State Functions ---
+            function saveGame() {
+                const gameState = {
+                    day, money, textbooks, calcBatteries, pens, homeworksCompleted,
+                    homeworkQueue, adLevel, laptopUpgraded, isEmployeeHiredToday, hoursLeft,
+                    currentLevel, potentialCustomers
+                };
+                localStorage.setItem('zubiHomeworkGame', JSON.stringify(gameState));
+            }
+
+            function loadGame() {
+                const savedState = localStorage.getItem('zubiHomeworkGame');
+                if (savedState) {
+                    const gameState = JSON.parse(savedState);
+                    day = gameState.day;
+                    money = gameState.money;
+                    textbooks = gameState.textbooks;
+                    calcBatteries = gameState.calcBatteries;
+                    pens = gameState.pens;
+                    homeworksCompleted = gameState.homeworksCompleted;
+                    homeworkQueue = gameState.homeworkQueue;
+                    adLevel = gameState.adLevel;
+                    laptopUpgraded = gameState.laptopUpgraded;
+                    isEmployeeHiredToday = gameState.isEmployeeHiredToday;
+                    hoursLeft = gameState.hoursLeft;
+                    currentLevel = gameState.currentLevel;
+                    potentialCustomers = gameState.potentialCustomers;
+                    logMessage("Game loaded from last save.");
+                } else {
+                    logMessage("Welcome to the shop! Start your first day.");
+                }
+            }
+
+            function resetGame() {
+                localStorage.removeItem('zubiHomeworkGame');
+                window.location.reload();
+            }
+
+            // --- UI Update & Game Logic ---
+            function updateBackground() {
+                const areaName = areaNames[currentLevel - 1];
+                const newColorClass = areaBackgrounds[areaName] || 'bg-gray-200';
+                document.body.className = `bg-transparent ${newColorClass}`;
+            }
+
+            function updateUI() {
+                dayDisplay.textContent = day;
+                moneyDisplay.textContent = `£${money.toFixed(2)}`;
+                textbooksDisplay.textContent = textbooks;
+                batteriesDisplay.textContent = calcBatteries;
+                pensDisplay.textContent = pens;
+                completedDisplay.textContent = homeworksCompleted;
+                timerDisplay.textContent = `${Math.floor(hoursLeft)}h ${Math.floor((hoursLeft % 1) * 60)}m`;
+                areaDisplay.textContent = areaNames[currentLevel - 1] || 'Max Level';
+                renderHomeworkQueue();
+                updateButtons();
+                updateShopButtons();
+                updateBackground();
+            }
+
+            function logMessage(message) {
+                messageLog.textContent = message;
+                saveGame();
+            }
+
+            function calculateRequirements(homework) {
+                const requiredPens = homework.length;
+                let requiredBatteries = Math.ceil(homework.timeRequired / 2);
+                let requiredTextbooks = Math.ceil(homework.difficulty / 2);
+
+                if (laptopUpgraded) {
+                    requiredTextbooks = Math.ceil(requiredTextbooks / 2);
+                }
+
+                let timeSpent = homework.timeRequired;
+                if (isEmployeeHiredToday) {
+                    timeSpent = timeSpent / 2;
+                }
+
+                return {
+                    pens: requiredPens,
+                    batteries: requiredBatteries,
+                    textbooks: requiredTextbooks,
+                    time: timeSpent
+                };
+            }
+
+            function generateNewCustomers() {
+                potentialCustomers = [];
+                const demand = Math.max(3, 3 + adLevel);
+                for (let i = 0; i < demand; i++) {
+                    const customerName = customerNames[Math.floor(Math.random() * customerNames.length)];
+                    const id = day + '-' + i;
+                    
+                    // Randomly determine job type
+                    const jobTypeRoll = Math.random();
+                    let jobType, homeworkName, grade, difficulty, length, timeRequired, basePrice, effect;
+
+                    if (jobTypeRoll < 0.1) { // 10% chance for a premium job
+                        jobType = 'premium';
+                        homeworkName = 'Tax Return';
+                        grade = 'N/A';
+                        difficulty = Math.floor(Math.random() * 3) + 3; // Harder
+                        length = Math.floor(Math.random() * 3) + 3; // Longer
+                        timeRequired = difficulty + length;
+                        basePrice = (difficulty * 10 + length * 8) * (1 + (currentLevel - 1) * 0.5);
+                        effect = 'High Payout';
+                    } else if (jobTypeRoll < 0.25) { // 15% chance for a charity job
+                        jobType = 'charity';
+                        homeworkName = homeworkTasks[Math.floor(Math.random() * homeworkTasks.length)];
+                        grade = 'N/A';
+                        difficulty = Math.floor(Math.random() * 2) + 1; // Easier
+                        length = Math.floor(Math.random() * 2) + 1; // Shorter
+                        timeRequired = difficulty + length;
+                        basePrice = (difficulty * 1 + length * 1); // Very low price
+                        effect = 'Boosts Advertising';
+                    } else { // 75% chance for a regular student job
+                        jobType = 'student';
+                        homeworkName = homeworkTasks[Math.floor(Math.random() * homeworkTasks.length)];
+                        grade = ['A*', 'A', 'B'][Math.floor(Math.random() * 3)];
+                        difficulty = Math.floor(Math.random() * 5) + 1;
+                        length = Math.floor(Math.random() * 5) + 1;
+                        timeRequired = difficulty + length;
+                        const gradeMultiplier = { 'A*': 1.8, 'A': 1.5, 'B': 1.2 };
+                        basePrice = (difficulty * 5 + length * 3) * (gradeMultiplier[grade]) * (1 + (currentLevel - 1) * 0.5);
+                        effect = 'Standard Job';
+                    }
+
+                    potentialCustomers.push({ id, customerName, homeworkName, grade, difficulty, length, timeRequired, basePrice, type: jobType, effect: effect });
+                }
+                logMessage(`Day ${day}: ${demand} new customers arrived.`);
+                displayNextCustomer();
+            }
+
+            function displayNextCustomer() {
+                if (potentialCustomers.length > 0) {
+                    currentCustomer = potentialCustomers[0];
+                    customerNameDisplay.textContent = currentCustomer.customerName;
+                    homeworkTaskDisplay.textContent = currentCustomer.homeworkName;
+                    homeworkGradeDisplay.textContent = currentCustomer.grade;
+                    homeworkDifficultyDisplay.textContent = currentCustomer.difficulty;
+                    quoteInput.value = (currentCustomer.basePrice).toFixed(2);
+                    jobEffectDisplay.textContent = currentCustomer.effect;
+                    
+                    // Calculate and display estimated costs
+                    const requirements = calculateRequirements(currentCustomer);
+                    estimatedTimeDisplay.textContent = `${requirements.time.toFixed(1)}h`;
+                    pensNeededDisplay.textContent = requirements.pens;
+                    batteriesNeededDisplay.textContent = requirements.batteries;
+                    textbooksNeededDisplay.textContent = requirements.textbooks;
+
+                    quoteSection.classList.remove('hidden');
+                } else {
+                    currentCustomer = null;
+                    quoteSection.classList.add('hidden');
+                    logMessage("No more customers to quote for today.");
+                }
+            }
+
+            function renderHomeworkQueue() {
+                homeworkList.innerHTML = '';
+                if (homeworkQueue.length === 0) {
+                    homeworkList.innerHTML = '<p class="text-center text-gray-500">No homeworks in queue.</p>';
+                }
+                homeworkQueue.forEach(hw => {
+                    const card = document.createElement('div');
+                    card.className = `homework-card grid grid-cols-5 gap-2 items-center ${selectedHomework && selectedHomework.id === hw.id ? 'selected' : ''}`;
+                    card.dataset.id = hw.id;
+                    card.innerHTML = `
+                        <p>${hw.customerName}</p>
+                        <p>${hw.homeworkName}</p>
+                        <p>${hw.grade}</p>
+                        <p>${hw.timeRequired}h</p>
+                        <p>${hw.difficulty}/5</p>
+                    `;
+                    if (hw.type === 'premium') {
+                         card.classList.add('premium');
+                         card.innerHTML += `<span class="premium-star">⭐</span>`;
+                    } else if (hw.type === 'charity') {
+                        card.classList.add('charity');
+                    }
+                    card.addEventListener('click', () => {
+                        selectedHomework = hw;
+                        renderHomeworkQueue();
+                        updateButtons();
+                        logMessage(`Selected homework from ${hw.customerName}.`);
+                    });
+                    homeworkList.appendChild(card);
+                });
+            }
+
+            function updateButtons() {
+                startHomeworkBtn.disabled = true;
+                startHomeworkBtn.className = 'flex-grow py-3 px-6 bg-gray-300 text-gray-500 font-bold rounded-lg shadow-md';
+                
+                if (currentLevel < levelUnlockCosts.length + 1) {
+                    unlockLevelBtn.textContent = `Unlock Next Area (£${levelUnlockCosts[currentLevel - 1]})`;
+                    unlockLevelBtn.disabled = false;
+                } else {
+                    unlockLevelBtn.textContent = 'Max Level Reached';
+                    unlockLevelBtn.disabled = true;
+                }
+            }
+
+            function updateShopButtons() {
+                const suppliesButtons = [buyTextbooksBtn, buyBatteriesBtn, buyPensBtn];
+                const canBuySupplies = (dayEnded || hoursLeft <= 0);
+
+                suppliesButtons.forEach(btn => {
+                    if (canBuySupplies) {
+                        btn.disabled = false;
+                        btn.classList.remove('bg-gray-400');
+                        btn.classList.add('bg-gray-200', 'hover:bg-gray-300');
+                    } else {
+                        btn.disabled = true;
+                        btn.classList.remove('bg-gray-200', 'hover:bg-gray-300');
+                        btn.classList.add('bg-gray-400');
+                    }
+                });
+
+                if (laptopUpgraded) {
+                    buyLaptopBtn.textContent = 'Laptop purchased!';
+                    buyLaptopBtn.disabled = true;
+                }
+
+                if (adLevel >= 5) {
+                    buyAdBtn.textContent = 'Max Level Reached';
+                    buyAdBtn.disabled = true;
+                    buyAdBtn.className = 'w-full py-2 px-4 bg-gray-300 text-gray-500 font-bold rounded-lg shadow-md';
+                } else {
+                    buyAdBtn.textContent = `Buy Advertising (£${adCosts[adLevel]})`;
+                    buyAdBtn.disabled = false;
+                    buyAdBtn.className = 'w-full py-2 px-4 bg-zubi-yellow text-slate-gray font-bold rounded-lg shadow-md hover:bg-yellow-400 transition-colors';
+                }
+
+                if (isEmployeeHiredToday) {
+                    hireEmployeeBtn.textContent = 'Employee Hired for Today!';
+                    hireEmployeeBtn.disabled = true;
+                    hireEmployeeBtn.className = 'w-full py-2 px-4 bg-gray-300 text-gray-500 font-bold rounded-lg shadow-md';
+                } else {
+                    hireEmployeeBtn.textContent = `Hire Employee for Today (£50)`;
+                    hireEmployeeBtn.disabled = false;
+                    hireEmployeeBtn.className = 'w-full py-2 px-4 bg-zubi-green text-white font-bold rounded-lg shadow-md hover:bg-green-700 transition-colors';
+                }
+            }
+
+            // --- Event Listeners ---
+            startHomeworkBtn.addEventListener('click', () => {
+                if (!selectedHomework) {
+                    logMessage("Please select a homework to start.");
+                    return;
+                }
+                
+                // The costs are already paid on acceptance, so we just get the money
+                money += selectedHomework.agreedPrice;
+                homeworksCompleted++;
+                homeworkQueue = homeworkQueue.filter(hw => hw.id !== selectedHomework.id);
+                logMessage(`You completed a homework for grade ${selectedHomework.grade}. You earned £${selectedHomework.agreedPrice.toFixed(2)}.`);
+                
+                // Check for charity bonus on completion
+                if (selectedHomework.type === 'charity') {
+                    adLevel++;
+                    logMessage("The charity advertised for you! Your ad level increased by 1.");
+                }
+
+                selectedHomework = null;
+                updateUI();
+            });
+
+            offerPriceBtn.addEventListener('click', () => {
+                if (!currentCustomer) {
+                    return;
+                }
+                const quote = parseFloat(quoteInput.value);
+                const baseAcceptanceRate = 0.5;
+                const priceFactor = 1.5;
+                const levelFactor = 0.1;
+
+                const acceptanceChance = Math.random() + (currentCustomer.basePrice / quote) * priceFactor + (currentLevel * levelFactor) - (quote / currentCustomer.basePrice) * 0.5;
+
+                if (acceptanceChance > baseAcceptanceRate) {
+                    const requirements = calculateRequirements(currentCustomer);
+                    if (pens < requirements.pens || calcBatteries < requirements.batteries || textbooks < requirements.textbooks || hoursLeft < requirements.time) {
+                        logMessage("You don't have enough supplies or time to commit to this homework! The customer left.");
+                        potentialCustomers.shift();
+                        displayNextCustomer();
+                        return;
+                    }
+
+                    // Deduct supplies and time immediately on acceptance
+                    pens -= requirements.pens;
+                    calcBatteries -= requirements.batteries;
+                    textbooks -= requirements.textbooks;
+                    hoursLeft -= requirements.time;
+
+                    logMessage(`${currentCustomer.customerName} accepts your offer of £${quote.toFixed(2)}! Homework added to queue.`);
+                    const acceptedHomework = { ...currentCustomer, agreedPrice: quote, status: 'waiting' };
+                    homeworkQueue.push(acceptedHomework);
+                    potentialCustomers.shift();
+                    displayNextCustomer();
+                } else {
+                    logMessage(`${currentCustomer.customerName} rejects your offer and leaves.`);
+                    potentialCustomers.shift();
+                    displayNextCustomer();
+                }
+                updateUI();
+            });
+
+            nextDayBtn.addEventListener('click', () => {
+                day++;
+                hoursLeft = shopOpenHours;
+                isEmployeeHiredToday = false;
+                dayEnded = false;
+                
+                generateNewCustomers();
+                updateUI();
+            });
+
+            buyTextbooksBtn.addEventListener('click', () => {
+                if (money >= baseSuppliesCost.textbooks) {
+                    money -= baseSuppliesCost.textbooks;
+                    textbooks += 10;
+                    logMessage(`You bought 10 textbooks for £${baseSuppliesCost.textbooks.toFixed(2)}.`);
+                    updateUI();
+                } else {
+                    logMessage("Not enough money to buy textbooks.");
+                }
+            });
+
+            buyBatteriesBtn.addEventListener('click', () => {
+                if (money >= baseSuppliesCost.batteries) {
+                    money -= baseSuppliesCost.batteries;
+                    calcBatteries += 10;
+                    logMessage(`You bought 10 calculator batteries for £${baseSuppliesCost.batteries.toFixed(2)}.`);
+                    updateUI();
+                } else {
+                    logMessage("Not enough money to buy batteries.");
+                }
+            });
+
+            buyPensBtn.addEventListener('click', () => {
+                if (money >= baseSuppliesCost.pens) {
+                    money -= baseSuppliesCost.pens;
+                    pens += 10;
+                    logMessage(`You bought 10 pens for £${baseSuppliesCost.pens.toFixed(2)}.`);
+                    updateUI();
+                } else {
+                    logMessage("Not enough money to buy pens.");
+                }
+            });
+
+            buyAdBtn.addEventListener('click', () => {
+                const adCost = adCosts[adLevel];
+                if (money >= adCost && adLevel < 5) {
+                    money -= adCost;
+                    adLevel++;
+                    logMessage(`Advertising level increased to ${adLevel}. More customers will show up!`);
+                    updateUI();
+                } else if (adLevel >= 5) {
+                    logMessage('You have reached the maximum advertising level.');
+                } else {
+                    logMessage(`Not enough money for more advertising. You need £${adCost}.`);
+                }
+            });
+
+            buyLaptopBtn.addEventListener('click', () => {
+                const upgradeCost = 500;
+                if (money >= upgradeCost && !laptopUpgraded) {
+                    money -= upgradeCost;
+                    laptopUpgraded = true;
+                    logMessage('You bought a laptop! It halves the number of textbooks you need.');
+                    updateUI();
+                } else if (laptopUpgraded) {
+                    logMessage('You already have the laptop upgrade.');
+                } else {
+                    logMessage('Not enough money to buy the laptop.');
+                }
+            });
+
+            hireEmployeeBtn.addEventListener('click', () => {
+                const hireCost = 50;
+                if (money >= hireCost && !isEmployeeHiredToday) {
+                    money -= hireCost;
+                    isEmployeeHiredToday = true;
+                    logMessage('You hired an employee for the day! They halve the time it takes to complete homework.');
+                    updateUI();
+                } else if (isEmployeeHiredToday) {
+                    logMessage('You already have an employee for the day.');
+                } else {
+                    logMessage(`Not enough money to hire an employee. Cost is £${hireCost}.`);
+                }
+            });
+            
+            unlockLevelBtn.addEventListener('click', () => {
+                const unlockCost = levelUnlockCosts[currentLevel - 1];
+                if (money >= unlockCost) {
+                    money -= unlockCost;
+                    currentLevel++;
+                    logMessage(`You have unlocked a new area: ${areaNames[currentLevel - 1]}. Customers will pay more!`);
+                    updateUI();
+                } else {
+                    logMessage(`Not enough money to unlock the next area. You need £${unlockCost}.`);
+                }
+            });
+
+            restartGameBtn.addEventListener('click', () => {
+                resetGame();
+            });
+
+            // Initial game setup
+            loadGame();
+            updateUI();
+            if (homeworkQueue.length === 0 && potentialCustomers.length === 0) {
+                generateNewCustomers();
+                updateUI();
+            } else if (potentialCustomers.length > 0 && currentCustomer === null) {
+                displayNextCustomer();
+            }
+        };
+    </script>
+</body>
+</html>
