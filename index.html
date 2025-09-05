@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zubi's Homework Shop V19</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'zubi-blue': '#A6E1FA',
+                        'zubi-green': '#B6D7A8',
+                        'zubi-pink': '#F4C2C2',
+                        'zubi-yellow': '#F9E79F',
+                        'slate-gray': '#58616A',
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.5s ease-in-out;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #1f2937;
+        }
+        .container {
+            max-width: 1200px;
+            width: 95%;
+            margin: 2rem auto;
+            background-color: #fff;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 2.5rem;
+        }
+        .message-log {
+            min-height: 3rem;
+            background-color: #f3f4f6;
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            font-size: 0.875rem;
+            color: #4b5563;
+        }
+        .homework-card {
+            background-color: #f8f8f8;
+            border: 2px solid #ddd;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .homework-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .homework-card.accepted {
+            border-color: #3b82f6;
+            background-color: #e0f2fe;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .homework-card.premium {
+            background-color: #fffbeb;
+            border-color: #fbbf24;
+        }
+        .homework-card.charity {
+            background-color: #ecfdf5;
+            border-color: #34d399;
+        }
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e5e7eb;
+            border-radius: 9999px;
+            height: 1.5rem;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+        .progress-bar {
+            background-color: #4ade80;
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 500px;
+        }
+        .cv-card {
+            background-color: #f8f8f8;
+            border: 2px solid #ddd;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .star-rating {
+            color: #fbbf24;
+            font-size: 1.2rem;
+        }
+        .subject-color-math { background-color: #F4C2C2; }
+        .subject-color-science { background-color: #A6E1FA; }
+        .subject-color-history { background-color: #B6D7A8; }
+        .subject-color-english { background-color: #F9E79F; }
+        .subject-color-finance { background-color: #d1d5db; }
+        .subject-color-premium { background-color: #fffbeb; }
+        .subject-color-charity { background-color: #ecfdf5; }
+        .assignment-btn {
+            background-color: #3b82f6;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .assignment-btn:hover {
+            background-color: #2563eb;
+        }
+        .assignment-btn.disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+        .worker-card {
+            background-color: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            font-size: 0.875rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Game Stats -->
+        <div class="lg:col-span-1 p-6 bg-zubi-pink rounded-xl shadow-lg flex flex-col items-center">
+            <h1 class="text-4xl font-bold mb-4 text-slate-gray text-center">Zubi's Homework Shop</h1>
+            <div class="grid grid-cols-2 gap-4 w-full">
+                <div class="p-4 bg-white rounded-lg shadow-inner text-center">
+                    <p class="text-sm font-medium text-slate-gray">Day</p>
+                    <p id="day-display" class="text-2xl font-bold">1</p>
+                </div>
+                <div class="p-4 bg-white rounded-lg shadow-inner text-center">
+                    <p class="text-sm font-medium text-slate-gray">Money</p>
+                    <p id="money-display" class="text-2xl font-bold text-zubi-green">£0.00</p>
+                </div>
+                <div class="p-4 bg-white rounded-lg shadow-inner text-center">
+                    <p class="text-sm font-medium text-slate-gray">Zubi Hours Left</p>
+                    <p id="zubi-hours-display" class="text-2xl font-bold">12:00</p>
+                </div>
+                <div class="p-4 bg-white rounded-lg shadow-inner text-center">
+                    <p class="text-sm font-medium text-slate-gray">Completed</p>
+                    <p id="completed-display" class="text-2xl font-bold">0</p>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4 w-full mt-4">
+                <div class="p-4 bg-white rounded-lg shadow-inner text-center">
+                    <p class="text-sm font-medium text-slate-gray">Zubi's Rating</p>
+                    <p id="zubi-rating-display" class="text-2xl font-bold star-rating">★</p>
+                </div>
+                <div class="p-4 bg-white rounded-lg shadow-inner text-center">
+                    <p class="text-sm font-medium text-slate-gray">Team Rating</p>
+                    <p id="team-rating-display" class="text-2xl font-bold star-rating">★</p>
+                </div>
+            </div>
+            
+            <div class="w-full mt-4">
+                <h3 class="text-xl font-semibold mb-2 text-slate-gray">Area: <span id="area-display"></span></h3>
+                <h3 class="text-xl font-semibold mb-2 text-slate-gray">Supplies</h3>
+                <div class="resource-row">
+                    <p class="text-sm font-medium text-gray-700">Textbooks: <span id="textbooks-display">0</span></p>
+                    <button id="buy-textbooks-btn" class="py-1 px-3 bg-gray-200 rounded-lg text-xs font-bold hover:bg-gray-300 transition-colors">Buy (£5)</button>
+                </div>
+                <div class="resource-row">
+                    <p class="text-sm font-medium text-gray-700">Calc. Batteries: <span id="batteries-display">0</span></p>
+                    <button id="buy-batteries-btn" class="py-1 px-3 bg-gray-200 rounded-lg text-xs font-bold hover:bg-gray-300 transition-colors">Buy (£2)</button>
+                </div>
+                <div class="resource-row">
+                    <p class="text-sm font-medium text-gray-700">Pens: <span id="pens-display">0</span></p>
+                    <button id="buy-pens-btn" class="py-1 px-3 bg-gray-200 rounded-lg text-xs font-bold hover:bg-gray-300 transition-colors">Buy (£1)</button>
+                </div>
+            </div>
+            <div class="w-full mt-4">
+                <h3 class="text-xl font-semibold mb-2 text-slate-gray">Your Team</h3>
+                <div id="employee-list" class="space-y-2">
+                    <!-- Employees will be rendered here -->
+                </div>
+            </div>
+            <div class="w-full mt-6">
+                <h3 class="text-xl font-semibold mb-2 text-slate-gray">Upgrades</h3>
+                <div class="grid grid-cols-1 gap-2">
+                    <button id="buy-ad-btn" class="w-full py-2 px-4 bg-zubi-yellow text-slate-gray font-bold rounded-lg shadow-md hover:bg-yellow-400 transition-colors">
+                        Buy Advertising (£50)
+                    </button>
+                    <button id="buy-laptop-btn" class="w-full py-2 px-4 bg-zubi-blue text-white font-bold rounded-lg shadow-md hover:bg-blue-500 transition-colors">
+                        Buy Laptop (£500)
+                    </button>
+                    <button id="search-cvs-btn" class="w-full py-2 px-4 bg-zubi-green text-white font-bold rounded-lg shadow-md hover:bg-green-700 transition-colors">
+                        Search CVs (£50)
+                    </button>
+                    <button id="unlock-level-btn" class="w-full py-2 px-4 bg-purple-500 text-white font-bold rounded-lg shadow-md hover:bg-purple-700 transition-colors">
+                        Unlock Next Area (£1000)
+                    </button>
+                    <button id="take-course-btn" class="w-full py-2 px-4 bg-indigo-500 text-white font-bold rounded-lg shadow-md hover:bg-indigo-700 transition-colors">
+                        Take a Course (£100)
+                    </button>
+                </div>
+            </div>
+
+            <div class="w-full mt-6">
+                <h3 class="text-xl font-semibold mb-2 text-slate-gray">Game Log</h3>
+                <p id="message-log" class="message-log">Welcome to the shop!</p>
+            </div>
+        </div>
+
+        <!-- Homework Queue and Actions -->
+        <div class="lg:col-span-2 p-6 bg-white rounded-xl shadow-lg">
+            <h2 class="text-2xl font-bold mb-4 text-slate-gray">Daily Clients</h2>
+            <div id="potential-clients-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Potential clients will be dynamically added here -->
+            </div>
+            
+            <h2 class="text-2xl font-bold mt-8 mb-4 text-slate-gray">Accepted Homework Queue</h2>
+            
+            <div id="queue-container" class="grid grid-cols-5 gap-2 text-center text-sm">
+                <p class="font-bold">Customer</p>
+                <p class="font-bold">Task</p>
+                <p class="font-bold">Time</p>
+                <p class="font-bold">Assigned</p>
+                <p class="font-bold">Action</p>
+            </div>
+            
+            <div id="homework-list" class="mt-4 grid grid-cols-1 gap-2">
+                <!-- Homework items will be dynamically added here -->
+            </div>
+            
+            <div class="mt-8 flex justify-between gap-4">
+                <button id="end-day-btn" class="flex-grow py-3 px-6 bg-zubi-blue text-white font-bold rounded-lg shadow-md hover:bg-blue-500 transition-colors">
+                    End Day
+                </button>
+            </div>
+            <div class="mt-4 text-center">
+                <button id="restart-game-btn" class="py-2 px-4 text-xs text-gray-500 rounded-lg hover:underline">
+                    Restart Game
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modals -->
+    <div id="cv-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold mb-4">Search CVs (£50)</h2>
+            <div id="cv-options">
+                <!-- CVs will be dynamically generated here -->
+            </div>
+            <div class="mt-4 flex justify-end">
+                <button id="close-cv-modal-btn" class="py-2 px-4 bg-gray-200 rounded-lg hover:bg-gray-300">Close</button>
+            </div>
+        </div>
+    </div>
+    <div id="event-modal" class="modal hidden">
+        <div class="modal-content text-center">
+            <h2 id="event-title" class="text-2xl font-bold mb-4"></h2>
+            <p id="event-description" class="text-lg"></p>
+            <div class="mt-6 flex justify-center">
+                <button id="close-event-modal-btn" class="py-2 px-4 bg-zubi-blue text-white rounded-lg hover:bg-blue-500">Okay</button>
+            </div>
+        </div>
+    </div>
+    <div id="summary-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold mb-4">End of Day Summary</h2>
+            <div class="space-y-4 text-gray-700">
+                <p>Day: <span id="summary-day" class="font-bold"></span></p>
+                <p>Jobs Completed: <span id="summary-completed" class="font-bold"></span></p>
+                <p>Money Earned: <span id="summary-earned" class="font-bold text-green-600"></span></p>
+                <p>Penalties: <span id="summary-penalties" class="font-bold text-red-600"></span></p>
+                <p>Purchases Made: <span id="summary-purchases" class="font-bold"></span></p>
+                <p class="text-sm italic text-gray-500">Note: Employees can only be assigned one job per day. Zubi can be assigned multiple.</p>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button id="close-summary-modal-btn" class="py-2 px-4 bg-zubi-blue text-white rounded-lg hover:bg-blue-500">Continue</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.onload = function() {
+            let day = 1;
+            let money = 30.00;
+            let textbooks = 10;
+            let calcBatteries = 10;
+            let pens = 20;
+            let homeworksCompleted = 0;
+            let homeworkQueue = [];
+            let potentialCustomers = [];
+            let currentLevel = 1;
+            let zubiHoursLeft = 12;
+
+            let employees = [];
+            let zubiRating = 1;
+            let randomEvent = null;
+            let purchasesToday = [];
+            let hasLaptop = false;
+
+            const employeeNames = ['Alex', 'Brenda', 'Chris', 'Dana', 'Evan', 'Fiona', 'George', 'Hannah'];
+            const subjects = ['Math', 'Science', 'History', 'English', 'Finance'];
+            const subjectColors = {
+                'Math': 'subject-color-math',
+                'Science': 'subject-color-science',
+                'History': 'subject-color-history',
+                'English': 'subject-color-english',
+                'Finance': 'subject-color-finance'
+            };
+            const homeworkTasksBySubject = {
+                'Math': ['Algebra', 'Geometry', 'Calculus', 'Statistics'],
+                'Science': ['Chemistry', 'Physics', 'Biology', 'Astronomy'],
+                'History': ['World War II', 'Roman Empire', 'Ancient Greece', 'Cold War'],
+                'English': ['Essay Writing', 'Poetry Analysis', 'Grammar', 'Creative Story'],
+                'Finance': ['Tax Return', 'Quarterly Report', 'Budgeting', 'Fundraising']
+            };
+            
+            const courseCost = 100;
+            const adCosts = [50, 100, 200, 400, 800];
+            const levelUnlockCosts = [1000, 2000, 4000, 8000];
+            const areaNames = ['Poorville', 'Snobland', 'Oldmoneyton', 'Corporate District', 'Academic City'];
+            const areaBackgrounds = {
+                'Poorville': 'bg-red-200',
+                'Snobland': 'bg-yellow-200',
+                'Oldmoneyton': 'bg-green-200',
+                'Corporate District': 'bg-blue-200',
+                'Academic City': 'bg-indigo-200'
+            };
+
+            const baseSuppliesCost = { textbooks: 5, batteries: 2, pens: 1 };
+            const shopOpenHours = 12;
+
+            // --- DOM Elements ---
+            const dayDisplay = document.getElementById('day-display');
+            const moneyDisplay = document.getElementById('money-display');
+            const textbooksDisplay = document.getElementById('textbooks-display');
+            const batteriesDisplay = document.getElementById('batteries-display');
+            const pensDisplay = document.getElementById('pens-display');
+            const completedDisplay = document.getElementById('completed-display');
+            const zubiHoursDisplay = document.getElementById('zubi-hours-display');
+            const messageLog = document.getElementById('message-log');
+            const homeworkList = document.getElementById('homework-list');
+            const endDayBtn = document.getElementById('end-day-btn');
+            const restartGameBtn = document.getElementById('restart-game-btn');
+            const buyTextbooksBtn = document.getElementById('buy-textbooks-btn');
+            const buyBatteriesBtn = document.getElementById('buy-batteries-btn');
+            const buyPensBtn = document = document.getElementById('buy-pens-btn');
+            const buyAdBtn = document.getElementById('buy-ad-btn');
+            const buyLaptopBtn = document.getElementById('buy-laptop-btn');
+            const searchCVsBtn = document.getElementById('search-cvs-btn');
+            const takeCourseBtn = document.getElementById('take-course-btn');
+            const unlockLevelBtn = document.getElementById('unlock-level-btn');
+            const areaDisplay = document.getElementById('area-display');
+            const zubiRatingDisplay = document.getElementById('zubi-rating-display');
+            const teamRatingDisplay = document.getElementById('team-rating-display');
+            const cvModal = document.getElementById('cv-modal');
+            const cvOptions = document.getElementById('cv-options');
+            const closeCvModalBtn = document.getElementById('close-cv-modal-btn');
+            const eventModal = document.getElementById('event-modal');
+            const eventTitle = document.getElementById('event-title');
+            const eventDescription = document.getElementById('event-description');
+            const closeEventModalBtn = document.getElementById('close-event-modal-btn');
+            const summaryModal = document.getElementById('summary-modal');
+            const summaryDay = document.getElementById('summary-day');
+            const summaryCompleted = document.getElementById('summary-completed');
+            const summaryEarned = document.getElementById('summary-earned');
+            const summaryPenalties = document.getElementById('summary-penalties');
+            const summaryPurchases = document.getElementById('summary-purchases');
+            const closeSummaryModalBtn = document.getElementById('close-summary-modal-btn');
+            const potentialClientsList = document.getElementById('potential-clients-list');
+            const employeeList = document.getElementById('employee-list');
+
+            // --- Game State Functions ---
+            function saveGame() {
+                const gameState = {
+                    day, money, textbooks, calcBatteries, pens, homeworksCompleted,
+                    homeworkQueue, employees, currentLevel, zubiRating, zubiHoursLeft, hasLaptop, purchasesToday
+                };
+                localStorage.setItem('zubiHomeworkGame', JSON.stringify(gameState));
+            }
+
+            function loadGame() {
+                const savedState = localStorage.getItem('zubiHomeworkGame');
+                if (savedState) {
+                    const gameState = JSON.parse(savedState);
+                    day = gameState.day;
+                    money = gameState.money;
+                    textbooks = gameState.textbooks;
+                    calcBatteries = gameState.calcBatteries;
+                    pens = gameState.pens;
+                    homeworksCompleted = gameState.homeworksCompleted;
+                    homeworkQueue = gameState.homeworkQueue;
+                    employees = gameState.employees || [];
+                    zubiRating = gameState.zubiRating || 1;
+                    zubiHoursLeft = gameState.zubiHoursLeft || 12;
+                    currentLevel = gameState.currentLevel || 1;
+                    hasLaptop = gameState.hasLaptop || false;
+                    purchasesToday = gameState.purchasesToday || [];
+                    logMessage("Game loaded from last save.");
+                } else {
+                    logMessage("Welcome to the shop! Start your first day.");
+                }
+            }
+
+            function resetGame() {
+                localStorage.removeItem('zubiHomeworkGame');
+                window.location.reload();
+            }
+
+            function getStarString(rating) {
+                const fullStars = '★'.repeat(Math.floor(rating));
+                const halfStar = (rating % 1 >= 0.5) ? '½' : '';
+                const emptyStars = '☆'.repeat(5 - Math.ceil(rating));
+                return fullStars + halfStar + emptyStars;
+            }
+
+            function updateUI() {
+                dayDisplay.textContent = day;
+                moneyDisplay.textContent = `£${money.toFixed(2)}`;
+                textbooksDisplay.textContent = textbooks;
+                batteriesDisplay.textContent = calcBatteries;
+                pensDisplay.textContent = pens;
+                completedDisplay.textContent = homeworksCompleted;
+                
+                zubiHoursDisplay.textContent = `${zubiHoursLeft.toFixed(1)}h`;
+                
+                areaDisplay.textContent = areaNames[currentLevel - 1] || 'Max Level';
+                zubiRatingDisplay.textContent = getStarString(zubiRating);
+                const teamRating = employees.length > 0 ? employees.reduce((sum, emp) => sum + emp.rating, 0) / employees.length : 0;
+                teamRatingDisplay.textContent = getStarString(teamRating);
+                
+                renderPotentialClients();
+                renderHomeworkQueue();
+                renderEmployees();
+                updateShopButtons();
+                updateBackground();
+                saveGame();
+            }
+            
+            function renderEmployees() {
+                employeeList.innerHTML = '';
+                employees.forEach(emp => {
+                    const card = document.createElement('div');
+                    card.className = 'worker-card';
+                    card.innerHTML = `
+                        <div class="flex-1">
+                            <p class="font-bold">${emp.name}</p>
+                            <p class="text-xs text-gray-500">Hours: ${emp.availableHours}/${emp.maxHours}h</p>
+                        </div>
+                        <p class="star-rating">${getStarString(emp.rating)}</p>
+                    `;
+                    employeeList.appendChild(card);
+                }
+                );
+            }
+
+            function updateBackground() {
+                const areaName = areaNames[currentLevel - 1];
+                const newColorClass = areaBackgrounds[areaName] || 'bg-gray-200';
+                document.body.className = `bg-transparent ${newColorClass}`;
+            }
+
+            function logMessage(message) {
+                messageLog.textContent = message;
+                saveGame();
+            }
+
+            function calculateTime(homework, worker) {
+                let timeSpent = homework.timeRequired;
+                
+                if (worker) {
+                    let rating = worker.rating;
+                    if (worker.specialty && worker.specialty === homework.subject) {
+                        rating = worker.specialtyRating;
+                    }
+                    timeSpent = Math.max(0.5, timeSpent * (1 - (rating / 5) * 0.5));
+                }
+
+                if (randomEvent && randomEvent.type === 'power_outage') {
+                    timeSpent *= 2;
+                }
+                
+                return timeSpent;
+            }
+
+            function generateNewCustomers() {
+                potentialCustomers = [];
+                let demand = Math.max(3, 3 + day);
+                
+                if (randomEvent && randomEvent.type === 'viral_post') {
+                    demand += 5;
+                }
+
+                for (let i = 0; i < demand; i++) {
+                    const customerName = `Client #${i + 1}`;
+                    const id = day + '-' + i;
+                    
+                    const jobTypeRoll = Math.random();
+                    let jobType, homeworkName, grade, difficulty, length, timeRequired, basePrice, effect, subject;
+                    let textbooksRequired, batteriesRequired, pensRequired;
+
+                    if (jobTypeRoll < 0.1) {
+                        jobType = 'premium';
+                        subject = 'Finance';
+                        homeworkName = homeworkTasksBySubject[subject][Math.floor(Math.random() * homeworkTasksBySubject[subject].length)];
+                        grade = 'A*';
+                        difficulty = Math.floor(Math.random() * 3) + 3;
+                        length = Math.floor(Math.random() * 3) + 3;
+                        timeRequired = difficulty + length;
+                        basePrice = (difficulty * 10 + length * 8) * (1 + (currentLevel - 1) * 0.5);
+                        effect = 'High Payout';
+                    } else if (jobTypeRoll < 0.25) {
+                        jobType = 'charity';
+                        const randomSubject = subjects[Math.floor(Math.random() * subjects.length)];
+                        subject = randomSubject;
+                        homeworkName = homeworkTasksBySubject[subject][Math.floor(Math.random() * homeworkTasksBySubject[subject].length)];
+                        grade = 'N/A';
+                        difficulty = Math.floor(Math.random() * 2) + 1;
+                        length = Math.floor(Math.random() * 2) + 1;
+                        timeRequired = difficulty + length;
+                        basePrice = (difficulty * 1 + length * 1);
+                        effect = 'Boosts Advertising';
+                    } else {
+                        jobType = 'student';
+                        const randomSubject = subjects[Math.floor(Math.random() * subjects.length)];
+                        subject = randomSubject;
+                        homeworkName = homeworkTasksBySubject[subject][Math.floor(Math.random() * homeworkTasksBySubject[subject].length)];
+                        grade = ['A*', 'A', 'B'][Math.floor(Math.random() * 3)];
+                        difficulty = Math.floor(Math.random() * 5) + 1;
+                        length = Math.floor(Math.random() * 5) + 1;
+                        timeRequired = difficulty + length;
+                        const gradeMultiplier = { 'A*': 1.8, 'A': 1.5, 'B': 1.2 };
+                        basePrice = (difficulty * 5 + length * 3) * (gradeMultiplier[grade]) * (1 + (currentLevel - 1) * 0.5);
+                        effect = 'Standard Job';
+                    }
+                    if (randomEvent && randomEvent.type === 'popularity_boost') {
+                         basePrice *= 1.5; // Event effect
+                    }
+
+                    textbooksRequired = Math.floor(difficulty);
+                    batteriesRequired = Math.floor(Math.random() * difficulty) + 1;
+                    pensRequired = Math.floor(length);
+
+                    potentialCustomers.push({ id, customerName, homeworkName, grade, difficulty, length, timeRequired, basePrice, type: jobType, effect: effect, subject, textbooksRequired, batteriesRequired, pensRequired });
+                }
+                logMessage(`Day ${day}: ${demand} new clients arrived. Review their requests!`);
+                renderPotentialClients();
+            }
+
+            function renderPotentialClients() {
+                potentialClientsList.innerHTML = '';
+                if (potentialCustomers.length === 0) {
+                    potentialClientsList.innerHTML = '<p class="text-center text-gray-500 col-span-2">No more clients waiting.</p>';
+                }
+                
+                potentialCustomers.forEach(customer => {
+                    const card = document.createElement('div');
+                    let colorClass = customer.type === 'premium' ? 'subject-color-premium' : (customer.type === 'charity' ? 'subject-color-charity' : subjectColors[customer.subject]);
+                    card.className = `homework-card p-4 rounded-lg shadow-md ${colorClass}`;
+                    card.innerHTML = `
+                        <h3 class="font-bold">${customer.customerName}</h3>
+                        <p class="text-sm">Subject: ${customer.subject}</p>
+                        <p class="text-sm">Task: ${customer.homeworkName}</p>
+                        <p class="text-sm">Grade: ${customer.grade}</p>
+                        <p class="text-sm">Difficulty: ${customer.difficulty}/5</p>
+                        <p class="text-sm">Time Required: ${customer.timeRequired.toFixed(1)}h</p>
+                        <div class="mt-2 text-xs">
+                            <p>Materials Needed:</p>
+                            <ul class="list-disc list-inside">
+                                <li>${customer.textbooksRequired} Textbooks</li>
+                                <li>${customer.batteriesRequired} Calc. Batteries</li>
+                                <li>${customer.pensRequired} Pens</li>
+                            </ul>
+                        </div>
+                        <div class="mt-2 flex items-center space-x-2">
+                            <label for="quote-input-${customer.id}" class="text-xs font-medium">Quote (£):</label>
+                            <input type="number" id="quote-input-${customer.id}" value="${customer.basePrice.toFixed(2)}" min="0.01" step="0.01" class="w-24 p-1 border border-gray-300 rounded-lg text-center text-xs">
+                        </div>
+                        <button class="mt-2 w-full py-2 px-4 bg-zubi-green text-white font-bold rounded-lg hover:bg-green-700 transition-colors accept-quote-btn" data-id="${customer.id}">Accept Quote</button>
+                    `;
+                    potentialClientsList.appendChild(card);
+                });
+
+                document.querySelectorAll('.accept-quote-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const id = e.target.dataset.id;
+                        const customer = potentialCustomers.find(c => c.id === id);
+                        const quote = parseFloat(document.getElementById(`quote-input-${id}`).value);
+                        acceptQuote(customer, quote);
+                    });
+                });
+            }
+
+            function acceptQuote(customer, quote) {
+                // First, check if the user has the required supplies
+                if (textbooks < customer.textbooksRequired || calcBatteries < customer.batteriesRequired || pens < customer.pensRequired) {
+                    logMessage(`Not enough supplies! You need ${customer.textbooksRequired - textbooks} more textbooks, ${customer.batteriesRequired - calcBatteries} more batteries, and ${customer.pensRequired - pens} more pens.`);
+                    return;
+                }
+
+                const baseAcceptanceRate = 0.5;
+                const priceFactor = 1.5;
+                const levelFactor = 0.1;
+                const reputationFactor = zubiRating * 0.1;
+
+                const acceptanceChance = Math.random() + (customer.basePrice / quote) * priceFactor + (currentLevel * levelFactor) + reputationFactor - (quote / customer.basePrice) * 0.5;
+
+                if (acceptanceChance > baseAcceptanceRate) {
+                    // Deduct supplies now that the job is accepted
+                    textbooks -= customer.textbooksRequired;
+                    calcBatteries -= customer.batteriesRequired;
+                    pens -= customer.pensRequired;
+
+                    const acceptedHomework = { ...customer, agreedPrice: quote, status: 'waiting', assignedWorker: null };
+                    homeworkQueue.push(acceptedHomework);
+                    logMessage(`${customer.customerName} accepts your offer of £${quote.toFixed(2)}! Supplies used. Homework added to queue.`);
+                    potentialCustomers = potentialCustomers.filter(c => c.id !== customer.id);
+                    updateUI();
+                } else {
+                    logMessage(`${customer.customerName} rejects your offer and leaves.`);
+                    potentialCustomers = potentialCustomers.filter(c => c.id !== customer.id);
+                    updateUI();
+                }
+            }
+
+            function renderHomeworkQueue() {
+                homeworkList.innerHTML = '';
+                if (homeworkQueue.length === 0) {
+                    homeworkList.innerHTML = '<p class="text-center text-gray-500 col-span-5">No homeworks in queue.</p>';
+                }
+                
+                homeworkQueue.forEach(hw => {
+                    const card = document.createElement('div');
+                    card.className = `homework-card grid grid-cols-5 gap-2 items-center text-sm`;
+                    if (hw.status === 'assigned') {
+                        card.classList.add('accepted');
+                    }
+                    let colorClass = hw.type === 'premium' ? 'subject-color-premium' : (hw.type === 'charity' ? 'subject-color-charity' : subjectColors[hw.subject]);
+                    card.classList.add(colorClass);
+
+                    const assignBtn = document.createElement('select');
+                    assignBtn.className = `p-1 border rounded-lg ${hw.assignedWorker ? 'bg-gray-200' : 'bg-white'}`;
+                    assignBtn.innerHTML = `<option value="">Assign...</option>`;
+
+                    const availableWorkers = [{ name: 'Zubi', assigned: homeworkQueue.filter(h => h.assignedWorker === 'Zubi').length > 0 },
+                                              ...employees.map(emp => ({ name: emp.name, assigned: homeworkQueue.find(h => h.assignedWorker === emp.name) }))
+                                             ];
+
+                    availableWorkers.forEach(worker => {
+                        if (worker.name === 'Zubi' || !worker.assigned) {
+                            assignBtn.innerHTML += `<option value="${worker.name}">${worker.name}</option>`;
+                        }
+                    });
+
+                    assignBtn.addEventListener('change', (e) => {
+                        const workerName = e.target.value;
+                        if(workerName) {
+                            assignWorker(hw.id, workerName);
+                        }
+                    });
+                    
+                    card.innerHTML = `
+                        <p>${hw.customerName}</p>
+                        <p>${hw.homeworkName}</p>
+                        <p>${hw.timeRequired.toFixed(1)}h</p>
+                        <p>${hw.assignedWorker ? hw.assignedWorker : 'Unassigned'}</p>
+                        <div></div>
+                    `;
+                    if (!hw.assignedWorker) {
+                      card.querySelector('div').appendChild(assignBtn);
+                    } else {
+                      card.querySelector('div').textContent = 'Assigned';
+                    }
+                    homeworkList.appendChild(card);
+                });
+            }
+
+            function assignWorker(homeworkId, workerName) {
+                const homework = homeworkQueue.find(hw => hw.id === homeworkId);
+                const worker = employees.find(emp => emp.name === workerName) || { name: 'Zubi', rating: zubiRating, specialty: 'All', specialtyRating: zubiRating, maxHours: 12 };
+                
+                const timeToComplete = calculateTime(homework, worker);
+                
+                if (workerName === 'Zubi') {
+                    if (zubiHoursLeft >= timeToComplete) {
+                        homework.assignedWorker = worker.name;
+                        homework.status = 'assigned';
+                        homework.timeToComplete = timeToComplete;
+                        zubiHoursLeft -= timeToComplete;
+                        logMessage(`${worker.name} has been assigned to ${homework.homeworkName}.`);
+                        updateUI();
+                    } else {
+                        logMessage(`Zubi doesn't have enough hours left. Choose another worker or end the day.`);
+                    }
+                } else {
+                    const employee = employees.find(emp => emp.name === workerName);
+                    if (!homeworkQueue.find(h => h.assignedWorker === employee.name && h.id !== homeworkId)) {
+                        homework.assignedWorker = employee.name;
+                        homework.status = 'assigned';
+                        homework.timeToComplete = timeToComplete;
+                        logMessage(`${worker.name} has been assigned to ${homework.homeworkName}.`);
+                        updateUI();
+                    } else {
+                        logMessage(`${worker.name} is already assigned a job for the day.`);
+                    }
+                }
+            }
+            
+            function updateShopButtons() {
+                buyLaptopBtn.disabled = hasLaptop;
+                buyLaptopBtn.classList.toggle('opacity-50', hasLaptop);
+                buyLaptopBtn.classList.toggle('cursor-not-allowed', hasLaptop);
+                
+                const buyButtons = [
+                    { btn: buyTextbooksBtn, cost: baseSuppliesCost.textbooks },
+                    { btn: buyBatteriesBtn, cost: baseSuppliesCost.batteries },
+                    { btn: buyPensBtn, cost: baseSuppliesCost.pens },
+                    { btn: buyAdBtn, cost: adCosts[0] },
+                    { btn: buyLaptopBtn, cost: 500 },
+                    { btn: searchCVsBtn, cost: 50 },
+                    { btn: takeCourseBtn, cost: courseCost },
+                ];
+
+                buyButtons.forEach(item => {
+                    const canAfford = money >= item.cost;
+                    if (item.btn !== buyLaptopBtn) {
+                        item.btn.disabled = !canAfford;
+                        item.btn.classList.toggle('opacity-50', !canAfford);
+                        item.btn.classList.toggle('cursor-not-allowed', !canAfford);
+                    }
+                });
+                
+                const unlockCost = levelUnlockCosts[currentLevel - 1];
+                const canUnlock = money >= unlockCost && currentLevel <= areaNames.length;
+                unlockLevelBtn.disabled = !canUnlock;
+                unlockLevelBtn.classList.toggle('opacity-50', !canUnlock);
+                unlockLevelBtn.classList.toggle('cursor-not-allowed', !canUnlock);
+                if (currentLevel > areaNames.length) {
+                    unlockLevelBtn.textContent = "Max Level Reached";
+                } else {
+                    unlockLevelBtn.textContent = `Unlock Next Area (£${unlockCost})`;
+                }
+            }
+            
+            function processDayWork() {
+                let totalEarnings = 0;
+                let totalPenalties = 0;
+                let completedJobs = 0;
+                let purchasesSummary = purchasesToday.join(', ');
+
+                const assignedHomeworks = homeworkQueue.filter(hw => hw.assignedWorker !== null);
+                const unassignedHomeworks = homeworkQueue.filter(hw => hw.assignedWorker === null);
+
+                assignedHomeworks.forEach(hw => {
+                    totalEarnings += hw.agreedPrice;
+                    completedJobs++;
+                    if (hw.type === 'charity') {
+                        zubiRating = Math.min(5, zubiRating + 0.1);
+                    }
+                });
+
+                unassignedHomeworks.forEach(hw => {
+                    // Penalties for unassigned jobs
+                    totalPenalties += hw.agreedPrice * 0.5; // 50% penalty
+                });
+                
+                money += totalEarnings - totalPenalties;
+                homeworksCompleted += completedJobs;
+                
+                showSummary(completedJobs, totalEarnings, totalPenalties, purchasesSummary);
+            }
+
+            function showSummary(completed, earned, penalties, purchases) {
+                summaryDay.textContent = day;
+                summaryCompleted.textContent = completed;
+                summaryEarned.textContent = `£${earned.toFixed(2)}`;
+                summaryPenalties.textContent = `£${penalties.toFixed(2)}`;
+                summaryPurchases.textContent = purchases || 'None';
+                summaryModal.classList.remove('hidden');
+            }
+
+            function startNewDay() {
+                day++;
+                zubiHoursLeft = 12;
+                employees.forEach(emp => emp.availableHours = emp.maxHours);
+                homeworkQueue = [];
+                potentialCustomers = [];
+                purchasesToday = [];
+                baseSuppliesCost.textbooks = 5;
+                baseSuppliesCost.batteries = 2;
+                baseSuppliesCost.pens = 1;
+                checkRandomEvent();
+                generateNewCustomers();
+                updateUI();
+            }
+            
+            // --- Event Listeners ---
+            endDayBtn.addEventListener('click', () => {
+                processDayWork();
+            });
+
+            closeSummaryModalBtn.addEventListener('click', () => {
+                summaryModal.classList.add('hidden');
+                startNewDay();
+            });
+
+            buyTextbooksBtn.addEventListener('click', () => {
+                const cost = baseSuppliesCost.textbooks;
+                if (money >= cost) {
+                    money -= cost;
+                    textbooks += 10;
+                    purchasesToday.push(`10 Textbooks (£${cost.toFixed(2)})`);
+                    logMessage(`You bought 10 textbooks for £${cost.toFixed(2)}.`);
+                    updateUI();
+                } else {
+                    logMessage("Not enough money to buy textbooks.");
+                }
+            });
+
+            buyBatteriesBtn.addEventListener('click', () => {
+                const cost = baseSuppliesCost.batteries;
+                if (money >= cost) {
+                    money -= cost;
+                    calcBatteries += 10;
+                    purchasesToday.push(`10 Batteries (£${cost.toFixed(2)})`);
+                    logMessage(`You bought 10 calculator batteries for £${cost.toFixed(2)}.`);
+                    updateUI();
+                } else {
+                    logMessage("Not enough money to buy batteries.");
+                }
+            });
+
+            buyPensBtn.addEventListener('click', () => {
+                const cost = baseSuppliesCost.pens;
+                if (money >= cost) {
+                    money -= cost;
+                    pens += 10;
+                    purchasesToday.push(`10 Pens (£${cost.toFixed(2)})`);
+                    logMessage(`You bought 10 pens for £${cost.toFixed(2)}.`);
+                    updateUI();
+                } else {
+                    logMessage("Not enough money to buy pens.");
+                }
+            });
+
+            buyAdBtn.addEventListener('click', () => {
+                const adCost = adCosts[0];
+                if (money >= adCost) {
+                    money -= adCost;
+                    zubiRating = Math.min(5, zubiRating + 0.5);
+                    purchasesToday.push(`Advertising (£${adCost.toFixed(2)})`);
+                    logMessage(`Advertising level increased! Your rating is now ${zubiRating.toFixed(2)} stars.`);
+                    updateUI();
+                } else {
+                    logMessage(`Not enough money for more advertising.`);
+                }
+            });
+
+            buyLaptopBtn.addEventListener('click', () => {
+                const upgradeCost = 500;
+                if (money >= upgradeCost) {
+                    money -= upgradeCost;
+                    hasLaptop = true;
+                    purchasesToday.push(`Laptop (£${upgradeCost.toFixed(2)})`);
+                    logMessage('You bought a laptop! All future homework completion times are now reduced by 10%.');
+                    updateUI();
+                } else {
+                    logMessage('Not enough money to buy the laptop.');
+                }
+            });
+
+            searchCVsBtn.addEventListener('click', () => {
+                if (money >= 50) {
+                    money -= 50;
+                    purchasesToday.push(`CV Search (£50.00)`);
+                    logMessage('You paid £50 to search for new employees.');
+                    showCVs();
+                } else {
+                    logMessage('Not enough money to search for employees.');
+                }
+            });
+
+            takeCourseBtn.addEventListener('click', () => {
+                if (employees.length === 0) {
+                    logMessage('You need to hire employees before you can take a course to improve your personal rating!');
+                    return;
+                }
+                
+                if (money >= courseCost) {
+                    const teamRating = employees.reduce((sum, emp) => sum + emp.rating, 0) / employees.length;
+                    money -= courseCost;
+                    zubiRating = Math.min(5, zubiRating + teamRating * 0.1);
+                    purchasesToday.push(`Course (£${courseCost.toFixed(2)})`);
+                    logMessage(`You took a course and improved your personal rating! Your rating is now ${zubiRating.toFixed(2)} stars.`);
+                } else {
+                    logMessage(`Not enough money to take a course. You need £${courseCost}.`);
+                }
+                updateUI();
+            });
+            
+            unlockLevelBtn.addEventListener('click', () => {
+                const unlockCost = levelUnlockCosts[currentLevel - 1];
+                if (currentLevel > areaNames.length) {
+                    logMessage('You are already at the max level!');
+                    return;
+                }
+
+                if (money >= unlockCost) {
+                    money -= unlockCost;
+                    currentLevel++;
+                    purchasesToday.push(`New Area Unlock (£${unlockCost.toFixed(2)})`);
+                    logMessage(`You have unlocked a new area: ${areaNames[currentLevel - 1]}. Customers will pay more!`);
+                } else {
+                    logMessage(`Not enough money to unlock the next area. You need £${unlockCost}.`);
+                }
+                updateUI();
+            });
+
+            restartGameBtn.addEventListener('click', () => {
+                resetGame();
+            });
+
+            closeCvModalBtn.addEventListener('click', () => {
+                cvModal.classList.add('hidden');
+            });
+
+            closeEventModalBtn.addEventListener('click', () => {
+                eventModal.classList.add('hidden');
+            });
+
+            function showCVs() {
+                cvOptions.innerHTML = '';
+                cvModal.classList.remove('hidden');
+
+                const numCVs = Math.floor(Math.random() * 3) + 1;
+                for (let i = 0; i < numCVs; i++) {
+                    const specialtySubject = subjects[Math.floor(Math.random() * subjects.length)];
+                    const employee = {
+                        id: `emp-${Date.now()}-${i}`,
+                        name: employeeNames[Math.floor(Math.random() * employeeNames.length)],
+                        rating: Math.floor(Math.random() * 5) + 1,
+                        specialty: specialtySubject,
+                        specialtyRating: Math.min(5, Math.floor(Math.random() * 3) + 3), // 3-5 star specialty
+                        maxHours: Math.floor(Math.random() * 7) + 4 // 4-10 hours
+                    };
+
+                    const card = document.createElement('div');
+                    card.className = 'cv-card';
+                    card.innerHTML = `
+                        <p class="font-bold">${employee.name}</p>
+                        <p class="text-sm">Rating: <span class="star-rating">${getStarString(employee.rating)}</span></p>
+                        <p class="text-sm">Specialty: ${employee.specialty} (${getStarString(employee.specialtyRating)})</p>
+                        <p class="text-sm">Hours Available: ${employee.maxHours}h</p>
+                        <p class="text-xs mt-2">Hire for £300</p>
+                    `;
+                    const hireBtn = document.createElement('button');
+                    hireBtn.className = 'py-1 px-3 mt-2 bg-zubi-green text-white rounded-lg text-xs hover:bg-green-700';
+                    hireBtn.textContent = 'Hire';
+                    hireBtn.addEventListener('click', () => hireEmployee(employee));
+                    card.appendChild(hireBtn);
+                    cvOptions.appendChild(card);
+                }
+            }
+
+            function hireEmployee(employee) {
+                if (money >= 300) {
+                    money -= 300;
+                    employees.push(employee);
+                    cvModal.classList.add('hidden');
+                    purchasesToday.push(`Hiring ${employee.name} (£300.00)`);
+                    logMessage(`You hired ${employee.name}! They are now part of your team.`);
+                    updateUI();
+                } else {
+                    logMessage('Not enough money to hire this employee!');
+                }
+            }
+            
+            function checkRandomEvent() {
+                const eventChance = Math.random();
+                if (eventChance < 0.1) {
+                    randomEvent = { type: 'power_outage', title: 'Power Outage!', description: 'A power outage has doubled the time it takes to complete all homework today.' };
+                } else if (eventChance < 0.2) {
+                    randomEvent = { type: 'textbook_shortage', title: 'Textbook Shortage!', description: 'A city-wide textbook shortage has tripled the cost of textbooks for today.' };
+                    baseSuppliesCost.textbooks *= 3;
+                } else if (eventChance < 0.3) {
+                    randomEvent = { type: 'viral_post', title: 'Viral Post!', description: 'A student posted about your shop online! You have a huge influx of customers and higher prices today.' };
+                } else if (eventChance < 0.4 && hasLaptop) {
+                    randomEvent = { type: 'computer_virus', title: 'Computer Virus!', description: 'Your laptop has a virus, rendering it unusable for the day. Its bonus is gone.'};
+                } else {
+                    randomEvent = null;
+                }
+                if (randomEvent) {
+                    eventTitle.textContent = randomEvent.title;
+                    eventDescription.textContent = randomEvent.description;
+                    eventModal.classList.remove('hidden');
+                }
+            }
+            
+            // Initial game setup
+            loadGame();
+            if (homeworkQueue.length === 0 && day === 1) {
+                checkRandomEvent();
+                generateNewCustomers();
+            } else if (homeworkQueue.length === 0) {
+                // If loaded game is mid-day, don't generate new customers immediately.
+                logMessage('Game loaded. Ready to finish the day or start a new one.');
+            }
+            updateUI();
+        };
+    </script>
+</body>
+</html>
